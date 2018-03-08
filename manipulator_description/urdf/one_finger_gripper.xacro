@@ -92,7 +92,7 @@
     </link>
 
     <!-- Revolute joint to moving finger -->
-    <joint name="moving_finger_joint" type="revolute">
+    <joint name="crane_plus_moving_finger_joint" type="revolute">
       <axis xyz="1 0 0"/>
       <parent link="${base_link_name}"/>
       <child link="moving_finger"/>

@@ -37,7 +37,7 @@
     </link>
 
     <!-- Joint to rotate the shoulder about the Z axis (yaw) -->
-    <joint name="shoulder_rotate_joint" type="revolute">
+    <joint name="crane_plus_shoulder_revolute_joint" type="revolute">
       <axis xyz="0 0 1"/>
       <parent link="base_link"/>
       <child link="shoulder_link"/>
@@ -84,17 +84,17 @@
     </link>
 
     <!-- Joint to rotate the shoulder about the Y axis (pitch) -->
-    <joint name="shoulder_pitch_joint" type="revolute">
+    <joint name="crane_plus_shoulder_flex_joint" type="revolute">
       <axis xyz="0 1 0"/>
       <parent link="shoulder_link"/>
-      <child link="upper_arm_link"/>
+      <child link="crane_plus_elbow"/>
       <origin xyz="0 0 ${SHOULDER_Z-0.01}" rpy="0 0 0"/>
       <limit lower="-${PI}" upper="${PI}" effort="30" velocity="${PI}"/>
     </joint>
 
     <!-- Upper arm link and joint -->
-    <xacro:arm_link link_name="upper_arm_link"
-        child_link_name="lower_arm_link"
+    <xacro:arm_link link_name="crane_plus_elbow"
+        child_link_name="crane_plus_wrist"
         llimit="-${2 * PI / 3}"
         ulimit="${2 * PI / 3}"
         colour="${link_colour_1}"/>
@@ -102,7 +102,7 @@
     <!-- Lower arm link and joint -->
     <!-- The far joint of this link is connected to the externally-specific link, which is usually
          an end effector. -->
-    <xacro:arm_link link_name="lower_arm_link"
+    <xacro:arm_link link_name="crane_plus_wrist"
         child_link_name="${end_effector_link}"
         llimit="${-2 * PI / 3}"
         ulimit="${2 * PI / 3}"
