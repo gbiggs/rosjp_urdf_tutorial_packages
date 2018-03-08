@@ -97,6 +97,7 @@
         child_link_name="crane_plus_wrist"
         llimit="-${2 * PI / 3}"
         ulimit="${2 * PI / 3}"
+        orientation="-1"
         colour="${link_colour_1}"/>
 
     <!-- Lower arm link and joint -->
@@ -106,13 +107,14 @@
         child_link_name="${end_effector_link}"
         llimit="${-2 * PI / 3}"
         ulimit="${2 * PI / 3}"
+        orientation="-1"
         colour="${link_colour_2}"/>
   </xacro:macro>
 
   <!-- Manipulator parts macros -->
   <!-- *origin parameter is for the joint at the child end of the link, not for where this link is
        rooted -->
-  <xacro:macro name="arm_link" params="link_name child_link_name llimit ulimit colour">
+  <xacro:macro name="arm_link" params="link_name child_link_name llimit ulimit orientation:=1 colour">
     <xacro:property name="ARM_LINK_X" value="0.032"/>
     <xacro:property name="ARM_LINK_Y" value="0.038"/>
     <xacro:property name="ARM_LINK_Z" value="0.12"/>
@@ -138,7 +140,7 @@
 
     <!-- This joint joins to the specified child link -->
     <joint name="${link_name}_joint" type="revolute">
-      <axis xyz="0 1 0"/>
+      <axis xyz="0 ${orientation} 0"/>
       <parent link="${link_name}"/>
       <child link="${child_link_name}"/>
       <limit lower="${llimit}" upper="${ulimit}" effort="30" velocity="${PI}"/>
