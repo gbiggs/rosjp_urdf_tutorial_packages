@@ -1,0 +1,7 @@
+manipulator_controller:
+  type: "position_controllers/JointTrajectoryController"
+  joints:
+    - shoulder_rotate_joint
+    - shoulder_pitch_joint
+    - upper_arm_link_joint
+    - lower_arm_link_joint

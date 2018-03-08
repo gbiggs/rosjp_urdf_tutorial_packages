@@ -31,4 +31,22 @@
   <xacro:one_finger_gripper base_link_name="${end_effector_base_link}"
       base_colour="black"
       finger_colour="grey"/>
+
+  <!-- Include Gazebo-specific information if in simulation mode -->
+  <xacro:if value="$(arg use_simulation)">
+    <xacro:include filename="$(find manipulator_description)/urdf/manipulator.gazebo.xacro"/>
+
+    <xacro:basic_transmission joint_name="shoulder_rotate_joint"/>
+    <xacro:basic_transmission joint_name="shoulder_pitch_joint"/>
+    <xacro:basic_transmission joint_name="upper_arm_link_joint"/>
+    <xacro:basic_transmission joint_name="lower_arm_link_joint"/>
+    <xacro:basic_transmission joint_name="moving_finger_joint"/>
+
+    <gazebo>
+      <plugin name="control" filename="libgazebo_ros_control.so"/>
+      <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+        <jointName>shoulder_rotate_joint, shoulder_pitch_joint, upper_arm_link_joint, lower_arm_link_joint, moving_finger_joint</jointName>
+      </plugin>
+    </gazebo>
+  </xacro:if>
 </robot>

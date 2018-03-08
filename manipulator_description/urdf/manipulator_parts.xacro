@@ -37,7 +37,7 @@
     </link>
 
     <!-- Joint to rotate the shoulder about the Z axis (yaw) -->
-    <joint name="shoulder_rotate" type="revolute">
+    <joint name="shoulder_rotate_joint" type="revolute">
       <axis xyz="0 0 1"/>
       <parent link="base_link"/>
       <child link="shoulder_link"/>
@@ -84,7 +84,7 @@
     </link>
 
     <!-- Joint to rotate the shoulder about the Y axis (pitch) -->
-    <joint name="shoulder_pitch" type="revolute">
+    <joint name="shoulder_pitch_joint" type="revolute">
       <axis xyz="0 1 0"/>
       <parent link="shoulder_link"/>
       <child link="upper_arm_link"/>

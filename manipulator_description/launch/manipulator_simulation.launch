@@ -1,0 +1,11 @@
+<launch>
+  <arg name="use_simulation" default="false"/>
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder '$(find manipulator_description)/urdf/manipulator.urdf.xacro' use_simulation:=$(arg use_simulation)"/>
+  <rosparam file="$(find manipulator_description)/config/manipulator.yaml" command="load"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
+    args="-param robot_description -urdf -model modular_manipulator"/>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" args="manipulator_controller"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+</launch>
