@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!-- Manipulator macro -->
+  <xacro:macro name="manipulator"
+      params="parent end_effector_link link_colour_1 link_colour_2 *origin">
+    <xacro:property name="PI" value="3.14159"/>
+
+    <!-- Joint to fix the base to the external world -->
+    <joint name="base_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="base_link"/>
+      <xacro:insert_block name="origin"/>
+    </joint>
+
+    <!-- Fixed base -->
+    <xacro:property name="BASE_X" value="0.05"/>
+    <xacro:property name="BASE_Y" value="0.032"/>
+    <xacro:property name="BASE_Z" value="0.038"/>
+    <link name="base_link">
+      <visual>
+        <geometry>
+          <box size="${BASE_X} ${BASE_Y} ${BASE_Z}"/>
+        </geometry>
+        <origin xyz="0 0 ${BASE_Z/2}" rpy="0 0 0"/>
+        <material name="${link_colour_1}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${BASE_X} ${BASE_Y} ${BASE_Z}"/>
+        </geometry>
+        <origin xyz="0 0 ${BASE_Z/2}" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="1e-3" ixy="0" ixz="0" iyy="1e-3" iyz="0" izz="1e-3"/>
+      </inertial>
+    </link>
+
+    <!-- Joint to rotate the shoulder about the Z axis (yaw) -->
+    <joint name="shoulder_rotate" type="revolute">
+      <axis xyz="0 0 1"/>
+      <parent link="base_link"/>
+      <child link="shoulder_link"/>
+      <origin xyz="${BASE_X/2-0.01} 0 ${BASE_Z}" rpy="0 0 0"/>
+      <limit lower="-${PI}" upper="${PI}" effort="30" velocity="${PI}"/>
+    </joint>
+
+    <!-- Small shoulder joint -->
+    <xacro:property name="SHOULDER_X" value="0.025"/>
+    <xacro:property name="SHOULDER_Y" value="0.0485"/>
+    <xacro:property name="SHOULDER_Z" value="0.0375"/>
+    <link name="shoulder_link">
+      <visual>
+        <geometry>
+          <box size="${SHOULDER_X} ${SHOULDER_Y} 0.01"/>
+        </geometry>
+        <origin xyz="0 0 0.005" rpy="0 0 0"/>
+        <material name="${link_colour_2}"/>
+      </visual>
+      <visual>
+        <geometry>
+          <box size="${SHOULDER_X} 0.005 ${SHOULDER_Z-0.01}"/>
+        </geometry>
+        <origin xyz="0 ${SHOULDER_Y/2-0.0025} ${0.01+(SHOULDER_Z-0.01)/2}" rpy="0 0 0"/>
+        <material name="${link_colour_2}"/>
+      </visual>
+      <visual>
+        <geometry>
+          <box size="${SHOULDER_X} 0.005 ${SHOULDER_Z-0.01}"/>
+        </geometry>
+        <origin xyz="0 ${-(SHOULDER_Y/2)+0.0025} ${0.01+(SHOULDER_Z-0.01)/2}" rpy="0 0 0"/>
+        <material name="${link_colour_2}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${SHOULDER_X} ${SHOULDER_Y} ${SHOULDER_Z}"/>
+        </geometry>
+        <origin xyz="0 0 ${SHOULDER_Z/2}" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.025"/>
+        <inertia ixx="1e-3" ixy="0" ixz="0" iyy="1e-3" iyz="0" izz="1e-3"/>
+      </inertial>
+    </link>
+
+    <!-- Joint to rotate the shoulder about the Y axis (pitch) -->
+    <joint name="shoulder_pitch" type="revolute">
+      <axis xyz="0 1 0"/>
+      <parent link="shoulder_link"/>
+      <child link="upper_arm_link"/>
+      <origin xyz="0 0 ${SHOULDER_Z-0.01}" rpy="0 0 0"/>
+      <limit lower="-${PI}" upper="${PI}" effort="30" velocity="${PI}"/>
+    </joint>
+
+    <!-- Upper arm link and joint -->
+    <xacro:arm_link link_name="upper_arm_link"
+        child_link_name="lower_arm_link"
+        llimit="-${2 * PI / 3}"
+        ulimit="${2 * PI / 3}"
+        colour="${link_colour_1}"/>
+
+    <!-- Lower arm link and joint -->
+    <!-- The far joint of this link is connected to the externally-specific link, which is usually
+         an end effector. -->
+    <xacro:arm_link link_name="lower_arm_link"
+        child_link_name="${end_effector_link}"
+        llimit="${-2 * PI / 3}"
+        ulimit="${2 * PI / 3}"
+        colour="${link_colour_2}"/>
+  </xacro:macro>
+
+  <!-- Manipulator parts macros -->
+  <!-- *origin parameter is for the joint at the child end of the link, not for where this link is
+       rooted -->
+  <xacro:macro name="arm_link" params="link_name child_link_name llimit ulimit colour">
+    <xacro:property name="ARM_LINK_X" value="0.032"/>
+    <xacro:property name="ARM_LINK_Y" value="0.038"/>
+    <xacro:property name="ARM_LINK_Z" value="0.12"/>
+    <link name="${link_name}">
+      <visual>
+        <geometry>
+          <box size="${ARM_LINK_X} ${ARM_LINK_Y} ${ARM_LINK_Z}"/>
+        </geometry>
+        <origin xyz="0 0 ${ARM_LINK_Z/2}" rpy="0 0 0"/>
+        <material name="${colour}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${ARM_LINK_X} ${ARM_LINK_Y} ${ARM_LINK_Z}"/>
+        </geometry>
+        <origin xyz="0 0 ${ARM_LINK_Z/2}" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.2"/>
+        <inertia ixx="1e-3" ixy="0" ixz="0" iyy="1e-3" iyz="0" izz="1e-3"/>
+      </inertial>
+    </link>
+
+    <!-- This joint joins to the specified child link -->
+    <joint name="${link_name}_joint" type="revolute">
+      <axis xyz="0 1 0"/>
+      <parent link="${link_name}"/>
+      <child link="${child_link_name}"/>
+      <limit lower="${llimit}" upper="${ulimit}" effort="30" velocity="${PI}"/>
+      <origin xyz="0 0 ${ARM_LINK_Z}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+</robot>

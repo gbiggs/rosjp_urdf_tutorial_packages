@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:macro name="one_finger_gripper" params="base_link_name base_colour finger_colour">
+    <xacro:property name="PI" value="3.14159"/>
+
+    <!-- Sizes of commonly-used parts -->
+    <xacro:property name="SERVO_X" value="0.032"/>
+    <xacro:property name="SERVO_Y" value="0.05"/>
+    <xacro:property name="SERVO_Z" value="0.038"/>
+
+    <!-- Base of gripper (where the servo is) -->
+    <link name="${base_link_name}">
+      <visual>
+        <geometry>
+          <box size="${SERVO_X} ${SERVO_Y} ${SERVO_Z}"/>
+        </geometry>
+        <origin xyz="0 0 ${SERVO_Z/2}" rpy="0 0 0"/>
+        <material name="${base_colour}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="${SERVO_X} ${SERVO_Y} ${SERVO_Z}"/>
+        </geometry>
+        <origin xyz="0 0 ${SERVO_Z/2}" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="1e-3" ixy="0" ixz="0" iyy="1e-3" iyz="0" izz="1e-3"/>
+      </inertial>
+    </link>
+
+    <!-- Fixed finger -->
+    <link name="fixed_finger">
+      <visual>
+        <geometry>
+          <box size="0.03 0.002 0.08"/>
+        </geometry>
+        <origin xyz="0 0 0.04" rpy="0 0 0"/>
+        <material name="${finger_colour}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.03 0.002 0.08"/>
+        </geometry>
+        <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.01"/>
+        <inertia ixx="1e-3" ixy="0" ixz="0" iyy="1e-3" iyz="0" izz="1e-3"/>
+      </inertial>
+    </link>
+
+    <!-- Fixed joint to fixed finger -->
+    <joint name="fixed_finger_joint" type="fixed">
+      <parent link="${base_link_name}"/>
+      <child link="fixed_finger"/>
+      <origin xyz="0 ${SERVO_Y/2} ${SERVO_Z}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Moving finger -->
+    <link name="moving_finger">
+      <visual>
+        <geometry>
+          <box size="0.03 0.002 0.04"/>
+        </geometry>
+        <origin xyz="0 -0.01414 0.01414" rpy="${PI/4} 0 0"/>
+        <material name="${finger_colour}"/>
+      </visual>
+      <visual>
+        <geometry>
+          <box size="0.03 0.002 0.05414"/>
+        </geometry>
+        <origin xyz="0 -0.02828 ${0.05415/2+0.02828}" rpy="0 0 0"/>
+        <material name="${finger_colour}"/>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.03 0.002 0.04"/>
+        </geometry>
+        <origin xyz="0 0 0.02" rpy="${PI/4} 0 0"/>
+      </collision>
+      <collision>
+        <geometry>
+          <box size="0.04 0.002 0.03"/>
+        </geometry>
+        <origin xyz="${0.02+0.02828} 0.02828 0.015" rpy="0 0 0"/>
+      </collision>
+      <inertial>
+        <mass value="0.01"/>
+        <inertia ixx="1e-3" ixy="0" ixz="0" iyy="1e-3" iyz="0" izz="1e-3"/>
+      </inertial>
+    </link>
+
+    <!-- Revolute joint to moving finger -->
+    <joint name="moving_finger_joint" type="revolute">
+      <axis xyz="1 0 0"/>
+      <parent link="${base_link_name}"/>
+      <child link="moving_finger"/>
+      <origin xyz="0 -${SERVO_Y/2} ${SERVO_Z}" rpy="0 0 0"/>
+      <limit lower="-0.75" upper="0.25" effort="30" velocity="${PI}"/>
+    </joint>
+  </xacro:macro>
+</robot>
